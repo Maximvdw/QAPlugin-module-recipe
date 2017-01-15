@@ -4,6 +4,10 @@ import be.maximvdw.qaplugin.api.AIModule;
 import be.maximvdw.qaplugin.api.AIQuestionEvent;
 import be.maximvdw.qaplugin.api.QAPluginAPI;
 import be.maximvdw.qaplugin.api.ai.*;
+import be.maximvdw.qaplugin.api.annotations.ModuleAuthor;
+import be.maximvdw.qaplugin.api.annotations.ModuleDescription;
+import be.maximvdw.qaplugin.api.annotations.ModuleName;
+import be.maximvdw.qaplugin.api.annotations.ModuleVersion;
 import be.maximvdw.qaplugin.api.exceptions.FeatureNotEnabled;
 import be.maximvdw.qaplugin.modules.utils.HtmlUtils;
 import be.maximvdw.qaplugin.modules.utils.ItemData;
@@ -26,13 +30,15 @@ import java.util.*;
  * RecipeModule
  * Created by maxim on 10-Jan-17.
  */
+@ModuleName("Recipe")
+@ModuleAuthor("Maximvdw")
+@ModuleVersion("1.1.0")
+@ModuleDescription("Ask the assistant for a recipe")
 public class RecipeModule extends AIModule implements Listener {
     private Method asNMSCopy;
     private Method a;
 
     public RecipeModule() {
-        super("recipe", "Maximvdw", "Ask the assistant for a recipe");
-
         Bukkit.getPluginManager().registerEvents(this, getPlugin());
 
         try {
