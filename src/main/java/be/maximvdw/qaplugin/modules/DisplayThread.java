@@ -1,11 +1,17 @@
 package be.maximvdw.qaplugin.modules;
 
+import be.maximvdw.qaplugin.QAPlugin;
+import be.maximvdw.qaplugin.modules.utils.HtmlUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.*;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.security.MessageDigest;
 import java.util.*;
 
 /**

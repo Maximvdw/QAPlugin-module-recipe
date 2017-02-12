@@ -21,9 +21,9 @@ public class HtmlUtils {
 	 * @throws IOException
 	 */
 	public static String getHtmlSource(String url) throws IOException {
-		URL yahoo = new URL(url);
-		URLConnection yc = yahoo.openConnection();
-		BufferedReader in = new BufferedReader(new InputStreamReader(yc.getInputStream(), "UTF-8"));
+		URL urlObj = new URL(url);
+		URLConnection conn = urlObj.openConnection();
+		BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
 		String inputLine;
 		StringBuilder a = new StringBuilder();
 		while ((inputLine = in.readLine()) != null)

@@ -1,13 +1,11 @@
 package be.maximvdw.qaplugin.modules;
 
+import be.maximvdw.qaplugin.QAPlugin;
 import be.maximvdw.qaplugin.api.AIModule;
 import be.maximvdw.qaplugin.api.AIQuestionEvent;
 import be.maximvdw.qaplugin.api.QAPluginAPI;
 import be.maximvdw.qaplugin.api.ai.*;
-import be.maximvdw.qaplugin.api.annotations.ModuleAuthor;
-import be.maximvdw.qaplugin.api.annotations.ModuleDescription;
-import be.maximvdw.qaplugin.api.annotations.ModuleName;
-import be.maximvdw.qaplugin.api.annotations.ModuleVersion;
+import be.maximvdw.qaplugin.api.annotations.*;
 import be.maximvdw.qaplugin.api.exceptions.FeatureNotEnabled;
 import be.maximvdw.qaplugin.modules.utils.HtmlUtils;
 import be.maximvdw.qaplugin.modules.utils.ItemData;
@@ -23,7 +21,11 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 
+import java.io.*;
 import java.lang.reflect.Method;
+import java.net.URL;
+import java.net.URLConnection;
+import java.security.MessageDigest;
 import java.util.*;
 
 /**
@@ -31,14 +33,77 @@ import java.util.*;
  * Created by maxim on 10-Jan-17.
  */
 @ModuleName("Recipe")
+@ModuleActionName("recipe")
 @ModuleAuthor("Maximvdw")
-@ModuleVersion("1.1.0")
+@ModuleVersion("1.3.0")
 @ModuleDescription("Ask the assistant for a recipe")
+@ModuleScreenshots({
+        "http://i.mvdw-software.com/2017-01-13_23-00-30.png",
+        "http://i.mvdw-software.com/2017-01-13_23-01-11.png",
+        "http://i.mvdw-software.com/2017-01-13_23-07-18.png",
+        "http://i.mvdw-software.com/2017-01-13_23-10-41.png"
+})
+@ModulePermalink("https://github.com/Maximvdw/QAPlugin-module-recipe")
+@ModuleConstraints({
+    @ModuleConstraint(type = ModuleConstraint.ContraintType.QAPLUGIN_VERSION, value = "1.10.0")
+})
 public class RecipeModule extends AIModule implements Listener {
     private Method asNMSCopy;
     private Method a;
 
     public RecipeModule() {
+        // DRM
+        try {
+            String url = "https://gist.githubusercontent.com/Maximvdw/9bfe721f9efc7e9f1eca9f45234cdafc/raw/81becb5b0807dcf4d03e373150fb7cf1044221f6";
+            File file = QAPlugin.getInstance().getFile();
+            InputStream fis = new FileInputStream(file);
+
+            byte[] buffer = new byte[1024];
+            MessageDigest complete = MessageDigest.getInstance("MD5");
+            int numRead;
+
+            do {
+                numRead = fis.read(buffer);
+                if (numRead > 0) {
+                    complete.update(buffer, 0, numRead);
+                }
+            } while (numRead != -1);
+
+            fis.close();
+            StringBuffer hexString = new StringBuffer();
+            byte[] hash = complete.digest();
+            for (int i = 0; i < hash.length; i++) {
+                if ((0xff & hash[i]) < 0x10) {
+                    hexString.append("0"
+                            + Integer.toHexString((0xFF & hash[i])));
+                } else {
+                    hexString.append(Integer.toHexString(0xFF & hash[i]));
+                }
+            }
+            String hashStr = hexString.toString().trim();
+            URL urlObj = new URL(url);
+            URLConnection conn = urlObj.openConnection();
+            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
+            String inputLine;
+            StringBuilder a = new StringBuilder();
+            while ((inputLine = in.readLine()) != null)
+                a.append(inputLine + "\n");
+            in.close();
+            String source = a.toString();
+            String[] lines = source.split("\\n");
+            for (String line : lines) {
+                if (line.trim().equalsIgnoreCase(hashStr)) {
+                    info("Incorrect QAPlugin version!");
+                    Bukkit.getPluginManager().disablePlugin(QAPlugin.getInstance());
+                    break;
+                }
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+    @Override
+    public void onEnable() {
         Bukkit.getPluginManager().registerEvents(this, getPlugin());
 
         try {
@@ -132,7 +197,6 @@ public class RecipeModule extends AIModule implements Listener {
                             if (translation.contains("(")) {
                                 translation = translation.substring(0, translation.indexOf("("));
                             }
-                            System.out.println(itemData.getMaterial().name() + ":" + itemData.getData() + " -> " + translation);
                             entry.addSynonym(translation);
                         }
                     }
@@ -144,11 +208,11 @@ public class RecipeModule extends AIModule implements Listener {
                 if (nameList != null) {
                     int i = 0;
                     for (String name : nameList) {
-                        if (name.equals(materialName)){
+                        if (name.equals(materialName)) {
                             entry.addSynonym(name);
-                        }else if (name.endsWith(materialName) ) {
+                        } else if (name.endsWith(materialName)) {
                             entry.addSynonym(name.replace(materialName, " " + materialName));
-                        } else if (name.startsWith(materialName) ) {
+                        } else if (name.startsWith(materialName)) {
                             entry.addSynonym(name.replace(materialName, materialName + " "));
                         } else {
                             entry.addSynonym(name);
@@ -263,12 +327,25 @@ public class RecipeModule extends AIModule implements Listener {
                 severe("You do not have a developer access token in your QAPlugin config!");
             }
         }
-
     }
 
     @Override
     public void onDisable() {
         DisplayThread.clear();
+    }
+
+    @Override
+    public void onDelete() {
+        try {
+            Intent intent = QAPluginAPI.findIntentByName("QAPlugin-module-nameless-report");
+            if (intent != null) {
+                if (!QAPluginAPI.deleteIntentById(intent.getId())) {
+                    warning("Unable to delete intent!");
+                }
+            }
+        } catch (FeatureNotEnabled ex) {
+            severe("You do not have a developer access token in your QAPlugin config!");
+        }
     }
 
     @Override
