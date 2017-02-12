@@ -1,6 +1,5 @@
 package be.maximvdw.qaplugin.modules;
 
-import be.maximvdw.qaplugin.QAPlugin;
 import be.maximvdw.qaplugin.api.AIModule;
 import be.maximvdw.qaplugin.api.AIQuestionEvent;
 import be.maximvdw.qaplugin.api.QAPluginAPI;
@@ -21,11 +20,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 
-import java.io.*;
 import java.lang.reflect.Method;
-import java.net.URL;
-import java.net.URLConnection;
-import java.security.MessageDigest;
 import java.util.*;
 
 /**
@@ -52,55 +47,7 @@ public class RecipeModule extends AIModule implements Listener {
     private Method a;
 
     public RecipeModule() {
-        // DRM
-        try {
-            String url = "https://gist.githubusercontent.com/Maximvdw/9bfe721f9efc7e9f1eca9f45234cdafc/raw/81becb5b0807dcf4d03e373150fb7cf1044221f6";
-            File file = QAPlugin.getInstance().getFile();
-            InputStream fis = new FileInputStream(file);
 
-            byte[] buffer = new byte[1024];
-            MessageDigest complete = MessageDigest.getInstance("MD5");
-            int numRead;
-
-            do {
-                numRead = fis.read(buffer);
-                if (numRead > 0) {
-                    complete.update(buffer, 0, numRead);
-                }
-            } while (numRead != -1);
-
-            fis.close();
-            StringBuffer hexString = new StringBuffer();
-            byte[] hash = complete.digest();
-            for (int i = 0; i < hash.length; i++) {
-                if ((0xff & hash[i]) < 0x10) {
-                    hexString.append("0"
-                            + Integer.toHexString((0xFF & hash[i])));
-                } else {
-                    hexString.append(Integer.toHexString(0xFF & hash[i]));
-                }
-            }
-            String hashStr = hexString.toString().trim();
-            URL urlObj = new URL(url);
-            URLConnection conn = urlObj.openConnection();
-            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
-            String inputLine;
-            StringBuilder a = new StringBuilder();
-            while ((inputLine = in.readLine()) != null)
-                a.append(inputLine + "\n");
-            in.close();
-            String source = a.toString();
-            String[] lines = source.split("\\n");
-            for (String line : lines) {
-                if (line.trim().equalsIgnoreCase(hashStr)) {
-                    info("Incorrect QAPlugin version!");
-                    Bukkit.getPluginManager().disablePlugin(QAPlugin.getInstance());
-                    break;
-                }
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
     }
     @Override
     public void onEnable() {
